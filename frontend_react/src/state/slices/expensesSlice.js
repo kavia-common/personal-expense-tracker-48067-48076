@@ -72,3 +72,21 @@ export const selectExpensesByCategory = createSelector([selectExpenses], (items)
     return acc;
   }, {});
 });
+
+/**
+ * Monthly totals selector:
+ * Groups expenses by YYYY-MM and sums amount.
+ */
+export const selectMonthlyTotals = createSelector([selectExpenses], (items) => {
+  const map = new Map();
+  items.forEach((e) => {
+    const d = new Date(e.date || Date.now());
+    if (isNaN(d.getTime())) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    map.set(key, (map.get(key) || 0) + (Number(e.amount) || 0));
+  });
+  // sort keys ascending
+  return Array.from(map.entries())
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .map(([month, total]) => ({ month, total }));
+});
