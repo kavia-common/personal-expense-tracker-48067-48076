@@ -27,6 +27,29 @@ Launches the test runner in interactive watch mode.
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
+## Frontend-only mode
+
+This application supports a frontend-only local mode. When no backend URL is configured, all data persists in your browser and reports are computed on-device.
+
+- Install dependencies: `npm install`
+- Start the app: `npm start`
+- Data storage: persisted via `localStorage` under:
+  - `ocean.expenses.categories`
+  - `ocean.expenses.items`
+
+You do not need any `.env` file to run in this mode. If you want to be explicit, you can add a `.env.local` with only relevant keys:
+
+```
+REACT_APP_FEATURE_FLAGS=charts
+REACT_APP_EXPERIMENTS_ENABLED=false
+# REACT_APP_HEALTHCHECK_PATH=/health
+# Leave these unset to stay offline:
+# REACT_APP_API_BASE=
+# REACT_APP_BACKEND_URL=
+```
+
+If you later introduce a backend, set `REACT_APP_API_BASE` (e.g., `http://localhost:4000/api`) and optionally `REACT_APP_HEALTHCHECK_PATH` (default `/health`). The app will automatically attempt remote calls instead of the local repository.
+
 ## Customization
 
 ### Colors
