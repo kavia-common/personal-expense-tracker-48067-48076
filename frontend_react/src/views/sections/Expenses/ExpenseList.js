@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteExpense, selectFilteredExpenses } from '../../../state/slices/expensesSlice';
 import { formatCurrency } from '../../../utils/formatters';
+import { useCategories } from '../../../state/slices/categoriesSlice';
 
 /**
  * Renders a list of expenses from the store with delete action.
@@ -10,6 +11,12 @@ import { formatCurrency } from '../../../utils/formatters';
 export default function ExpenseList() {
   const dispatch = useDispatch();
   const items = useSelector(selectFilteredExpenses);
+  const { categories } = useCategories();
+
+  const catNameById = categories.reduce((m, c) => {
+    m[c.id] = c.name;
+    return m;
+  }, {});
 
   if (!items.length) {
     return <p className="muted">No expenses yet. Add your first expense below.</p>;
@@ -30,7 +37,7 @@ export default function ExpenseList() {
         {items.map((e) => (
           <div role="row" className="list-row" key={e.id}>
             <div role="cell">{e.title}</div>
-            <div role="cell">{e.categoryId}</div>
+            <div role="cell">{catNameById[e.categoryId] || e.categoryId}</div>
             <div role="cell">{formatCurrency(e.amount)}</div>
             <div role="cell">{e.date}</div>
             <div role="cell" style={{ textAlign: 'right' }}>

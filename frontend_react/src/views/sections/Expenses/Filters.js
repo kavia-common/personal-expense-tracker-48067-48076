@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { filterChanged } from '../../../state/slices/expensesSlice';
+import { filterChanged, resetFilters } from '../../../state/slices/expensesSlice';
 import { useFeatureFlags } from '../../../hooks/useFeatureFlags';
 
 /**
@@ -18,9 +18,17 @@ export default function Filters() {
     dispatch(filterChanged({ query, min: Number(min) || undefined, max: Number(max) || undefined, date }));
   };
 
+  const clearAll = () => {
+    setQuery('');
+    setMin('');
+    setMax('');
+    setDate('');
+    dispatch(resetFilters());
+  };
+
   return (
     <div className="filters">
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr auto auto', gap: 10 }}>
         <label className="sr-only" htmlFor="q">Search</label>
         <input id="q" className="search-input" placeholder="Search title..." value={query} onChange={(e) => setQuery(e.target.value)} />
         <label className="sr-only" htmlFor="min">Min</label>
@@ -30,6 +38,7 @@ export default function Filters() {
         <label className="sr-only" htmlFor="date">Date</label>
         <input id="date" className="search-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         <button className="btn primary" onClick={apply} aria-label="Apply filters">Apply</button>
+        <button className="btn" onClick={clearAll} aria-label="Clear filters">Clear</button>
       </div>
       {experimentsEnabled && (
         <div style={{ marginTop: 10 }}>
