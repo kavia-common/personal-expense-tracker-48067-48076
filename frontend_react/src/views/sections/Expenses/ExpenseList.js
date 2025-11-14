@@ -5,7 +5,7 @@ import { formatCurrency } from '../../../utils/formatters';
 
 /**
  * Renders a list of expenses from the store with delete action.
- * Edit can be added in the future; API wiring will replace local state.
+ * Persists via apiClient/localRepo in offline mode.
  */
 export default function ExpenseList() {
   const dispatch = useDispatch();

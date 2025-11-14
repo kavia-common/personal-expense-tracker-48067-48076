@@ -23,7 +23,7 @@ export default function TopNav() {
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
 
   const onQuickAdd = () => {
-    // Adds a placeholder expense for demonstration/testing
+    // Adds a placeholder expense for demonstration/testing via async thunk (persists to local)
     dispatch(
       addExpenseQuick({
         title: 'Coffee',

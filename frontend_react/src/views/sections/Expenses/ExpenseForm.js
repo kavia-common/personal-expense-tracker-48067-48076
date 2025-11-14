@@ -4,7 +4,7 @@ import { addExpense } from '../../../state/slices/expensesSlice';
 import { useCategories } from '../../../state/slices/categoriesSlice';
 
 /**
- * Form to add an expense to local state. Will later integrate with API.
+ * Form to add an expense with persistence through apiClient/localRepo.
  */
 export default function ExpenseForm() {
   const dispatch = useDispatch();

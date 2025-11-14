@@ -8,8 +8,15 @@ Provide these variables via `.env` at the project root or container environment.
 - REACT_APP_FEATURE_FLAGS: Comma-separated list of flags (e.g., charts,newFilters)
 - REACT_APP_EXPERIMENTS_ENABLED: "true" to enable experimental UI
 
-The apiClient will use REACT_APP_API_BASE or REACT_APP_BACKEND_URL and append request paths.
+The apiClient will:
+- Use REACT_APP_API_BASE or REACT_APP_BACKEND_URL for remote requests when provided.
+- Fall back to a built-in local repository (localStorage-based) when neither is set. In this offline mode, all CRUD operations and reports are computed on-device and persisted in the browser.
 
-Integration note:
-- Backend routes are mounted at /api/* so REACT_APP_API_BASE should include /api.
+Local mode details:
+- Seed categories are added on first run: Food, Transport, Rent, Misc.
+- Data persists in localStorage keys: ocean.expenses.categories, ocean.expenses.items.
+- Reports/Charts operate from Redux selectors and/or local computations; no backend required.
+
+Integration note (for optional backend):
+- Backend routes are expected at /api/* so REACT_APP_API_BASE should include /api.
 - Example: REACT_APP_API_BASE=http://localhost:4000/api and REACT_APP_HEALTHCHECK_PATH=/health

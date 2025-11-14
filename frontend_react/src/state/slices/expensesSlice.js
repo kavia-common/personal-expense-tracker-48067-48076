@@ -1,47 +1,87 @@
-import { createSlice, nanoid, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import { apiClient } from '../../services/apiClient';
+
+// Thunks for expenses (localRepo in offline mode)
+
+// PUBLIC_INTERFACE
+export const fetchExpenses = createAsyncThunk('expenses/fetchAll', async () => {
+  /** Loads expenses from apiClient. */
+  const data = await apiClient.get('/expenses');
+  return Array.isArray(data) ? data : [];
+});
+
+// PUBLIC_INTERFACE
+export const addExpense = createAsyncThunk('expenses/create', async (expense) => {
+  /** Creates a new expense via apiClient and returns created entity. */
+  const created = await apiClient.post('/expenses', expense);
+  return created;
+});
+
+// PUBLIC_INTERFACE
+export const addExpenseQuick = createAsyncThunk('expenses/createQuick', async (expense) => {
+  /** Creates a new expense via apiClient (quick action). */
+  const created = await apiClient.post('/expenses', expense);
+  return created;
+});
+
+// PUBLIC_INTERFACE
+export const deleteExpense = createAsyncThunk('expenses/delete', async (id) => {
+  /** Deletes an expense by id via apiClient and returns deleted id. */
+  await apiClient.delete(`/expenses/${id}`);
+  return id;
+});
 
 const initialState = {
   items: [],
   filters: { query: '', min: undefined, max: undefined, date: '' },
+  loading: false,
+  error: '',
 };
 
 const slice = createSlice({
   name: 'expenses',
   initialState,
   reducers: {
-    addExpense: {
-      reducer(state, action) {
-        state.items.push(action.payload);
-      },
-      prepare(expense) {
-        return {
-          payload: { id: nanoid(), ...expense },
-        };
-      },
-    },
-    addExpenseQuick: {
-      reducer(state, action) {
-        state.items.push(action.payload);
-      },
-      prepare(expense) {
-        return {
-          payload: { id: nanoid(), ...expense },
-        };
-      },
-    },
-    deleteExpense(state, action) {
-      state.items = state.items.filter((e) => e.id !== action.payload);
-    },
+    // PUBLIC_INTERFACE
     filterChanged(state, action) {
+      /** Updates expense filter state. */
       state.filters = { ...state.filters, ...action.payload };
     },
+    // PUBLIC_INTERFACE
     resetFilters(state) {
+      /** Resets filters to initial values. */
       state.filters = initialState.filters;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchExpenses.pending, (state) => {
+        state.loading = true;
+        state.error = '';
+      })
+      .addCase(fetchExpenses.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload || [];
+      })
+      .addCase(fetchExpenses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error?.message || 'Failed to load expenses';
+        if (!state.items.length) state.items = [];
+      })
+      .addCase(addExpense.fulfilled, (state, action) => {
+        if (action.payload) state.items.push(action.payload);
+      })
+      .addCase(addExpenseQuick.fulfilled, (state, action) => {
+        if (action.payload) state.items.push(action.payload);
+      })
+      .addCase(deleteExpense.fulfilled, (state, action) => {
+        const id = action.payload;
+        state.items = state.items.filter((e) => e.id !== id);
+      });
+  },
 });
 
-export const { addExpense, addExpenseQuick, deleteExpense, filterChanged, resetFilters } = slice.actions;
+export const { filterChanged, resetFilters } = slice.actions;
 
 export default slice.reducer;
 
@@ -52,9 +92,9 @@ export const selectFilters = (s) => selectExpensesState(s).filters;
 
 export const selectFilteredExpenses = createSelector([selectExpenses, selectFilters], (items, f) => {
   return items.filter((e) => {
-    if (f.query && !e.title.toLowerCase().includes(f.query.toLowerCase())) return false;
-    if (typeof f.min === 'number' && e.amount < f.min) return false;
-    if (typeof f.max === 'number' && e.amount > f.max) return false;
+    if (f.query && !String(e.title || '').toLowerCase().includes(String(f.query).toLowerCase())) return false;
+    if (typeof f.min === 'number' && Number(e.amount) < f.min) return false;
+    if (typeof f.max === 'number' && Number(e.amount) > f.max) return false;
     if (f.date && e.date !== f.date) return false;
     return true;
   });
