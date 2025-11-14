@@ -1,13 +1,30 @@
 :root {
+  /* Ocean Professional core palette */
   --primary: #2563EB;
+  --primary-600: #2563EB;
+  --primary-500: #3B82F6;
+  --primary-400: #60A5FA;
+
   --secondary: #F59E0B;
-  --success: #F59E0B;
+  --secondary-500: #F59E0B;
+  --secondary-400: #FBBF24;
+
+  --success: #10B981;
   --error: #EF4444;
+
   --bg: #f9fafb;
   --surface: #ffffff;
   --text: #111827;
   --muted: #6B7280;
   --border: #E5E7EB;
+
+  /* Navigation-specific tokens for easy future tweaks */
+  --nav-surface: var(--surface);
+  --nav-shadow: 0 6px 16px rgba(2, 6, 23, 0.06), 0 1px 3px rgba(2, 6, 23, 0.06);
+  --nav-hover-bg: color-mix(in oklab, var(--primary) 10%, transparent);
+  --nav-active-bg: color-mix(in oklab, var(--primary) 18%, transparent);
+  --nav-active-border: color-mix(in oklab, var(--primary) 30%, transparent);
+  --nav-focus-ring: color-mix(in oklab, var(--primary) 60%, transparent);
 }
 
 [data-theme="dark"] {
@@ -16,6 +33,13 @@
   --text: #e5e7eb;
   --muted: #94A3B8;
   --border: #1f2937;
+
+  /* Dark mode adjustments for navigation tokens */
+  --nav-surface: var(--surface);
+  --nav-hover-bg: color-mix(in oklab, var(--primary) 18%, transparent);
+  --nav-active-bg: color-mix(in oklab, var(--primary) 26%, transparent);
+  --nav-active-border: color-mix(in oklab, var(--primary) 42%, transparent);
+  --nav-focus-ring: color-mix(in oklab, var(--primary) 70%, transparent);
 }
 
 * { box-sizing: border-box; }
@@ -36,8 +60,8 @@ body {
 
 a { color: inherit; }
 
-button:focus, input:focus, select:focus {
-  outline: 2px solid rgba(37,99,235,0.6);
+button:focus, input:focus, select:focus, a:focus {
+  outline: 2px solid var(--nav-focus-ring);
   outline-offset: 2px;
 }
 
