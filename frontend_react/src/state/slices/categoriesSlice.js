@@ -19,6 +19,13 @@ export const createCategoryAsync = createAsyncThunk('categories/create', async (
 });
 
 // PUBLIC_INTERFACE
+export const updateCategoryAsync = createAsyncThunk('categories/update', async ({ id, changes }) => {
+  /** Updates a category via apiClient and returns updated entity. */
+  const updated = await apiClient.put(`/categories/${id}`, changes);
+  return updated;
+});
+
+// PUBLIC_INTERFACE
 export const deleteCategoryAsync = createAsyncThunk('categories/delete', async (id) => {
   /** Deletes a category by id via apiClient and returns deleted id. */
   await apiClient.delete(`/categories/${id}`);
@@ -60,6 +67,11 @@ const slice = createSlice({
       })
       .addCase(createCategoryAsync.fulfilled, (state, action) => {
         if (action.payload) state.categories.push(action.payload);
+      })
+      .addCase(updateCategoryAsync.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const idx = state.categories.findIndex((c) => c.id === updated.id);
+        if (idx !== -1) state.categories[idx] = updated;
       })
       .addCase(deleteCategoryAsync.fulfilled, (state, action) => {
         const id = action.payload;

@@ -1,10 +1,10 @@
 //
+//
 // Local repository for offline persistence using localStorage with optional IndexedDB fallback.
 // Provides CRUD for categories and expenses and helpers for reporting.
 //
 // PUBLIC INTERFACE: All exported functions maintain API-like signatures to be used by apiClient.
 //
-
 const STORAGE_KEYS = {
   categories: 'ocean.expenses.categories',
   expenses: 'ocean.expenses.items',
@@ -143,11 +143,30 @@ export async function listCategories() {
  */
 export async function createCategory({ name }) {
   /** Creates a new category with generated id, returns created entity. */
-  if (!name) throw new Error('Category name is required');
+  const trimmed = String(name || '').trim();
+  if (!trimmed) throw new Error('Category name is required');
   const cats = lsGet(STORAGE_KEYS.categories, DEFAULT_CATEGORIES.slice());
-  const newCat = { id: uid('cat'), name: String(name).trim() };
+  const newCat = { id: uid('cat'), name: trimmed };
   lsSet(STORAGE_KEYS.categories, [...cats, newCat]);
   return newCat;
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Update a category by id with provided changes.
+ */
+export async function updateCategory(id, changes = {}) {
+  /** Updates a category name; validates non-empty. Returns updated entity. */
+  const cats = lsGet(STORAGE_KEYS.categories, DEFAULT_CATEGORIES.slice());
+  const idx = cats.findIndex((c) => c.id === id);
+  if (idx === -1) throw new Error('Category not found');
+  const nextName = changes.name !== undefined ? String(changes.name).trim() : cats[idx].name;
+  if (!nextName) throw new Error('Category name cannot be empty');
+  const updated = { ...cats[idx], name: nextName };
+  const next = cats.slice();
+  next[idx] = updated;
+  lsSet(STORAGE_KEYS.categories, next);
+  return updated;
 }
 
 /**
@@ -191,9 +210,50 @@ export async function listExpenses(params = {}) {
 export async function createExpense(expense) {
   /** Creates an expense entry and returns created entity. */
   const e = normalizeExpense(expense || {});
+  if (!e.title) throw new Error('Title is required');
+  if (Number.isNaN(e.amount) || e.amount < 0) throw new Error('Amount must be >= 0');
   const items = lsGet(STORAGE_KEYS.expenses, []);
   lsSet(STORAGE_KEYS.expenses, [...items, e]);
   return e;
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Update an expense by id with provided changes.
+ */
+export async function updateExpense(id, changes = {}) {
+  /** Updates expense fields; validates title non-empty and amount >= 0. Returns updated entity. */
+  const items = lsGet(STORAGE_KEYS.expenses, []);
+  const idx = items.findIndex((e) => e.id === id);
+  if (idx === -1) throw new Error('Expense not found');
+
+  const existing = items[idx];
+  const merged = {
+    ...existing,
+    ...changes,
+  };
+
+  // Normalize certain fields if supplied
+  if (merged.title !== undefined) merged.title = String(merged.title).trim();
+  if (merged.amount !== undefined) merged.amount = Number(merged.amount);
+  if (merged.date !== undefined) {
+    try {
+      const d = new Date(merged.date);
+      merged.date = d.toISOString().slice(0, 10);
+    } catch {
+      merged.date = existing.date;
+    }
+  }
+
+  // Validation
+  if (!merged.title) throw new Error('Title is required');
+  if (Number.isNaN(merged.amount) || merged.amount < 0) throw new Error('Amount must be >= 0');
+  if (!merged.categoryId) merged.categoryId = existing.categoryId || 'misc';
+
+  const next = items.slice();
+  next[idx] = merged;
+  lsSet(STORAGE_KEYS.expenses, next);
+  return merged;
 }
 
 /**

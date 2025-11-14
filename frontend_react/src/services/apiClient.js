@@ -92,6 +92,10 @@ async function localRoute(method, path, body) {
       const id = p.split('/')[2];
       return await localRepo.deleteCategory(id);
     }
+    if (p.startsWith('/categories/') && method === 'PUT') {
+      const id = p.split('/')[2];
+      return await localRepo.updateCategory(id, body || {});
+    }
     // Expenses
     if (p === '/expenses' && method === 'GET') {
       return await localRepo.listExpenses();
@@ -102,6 +106,10 @@ async function localRoute(method, path, body) {
     if (p.startsWith('/expenses/') && method === 'DELETE') {
       const id = p.split('/')[2];
       return await localRepo.deleteExpense(id);
+    }
+    if (p.startsWith('/expenses/') && method === 'PUT') {
+      const id = p.split('/')[2];
+      return await localRepo.updateExpense(id, body || {});
     }
   } catch (e) {
     // Normalize errors to look like fetch error

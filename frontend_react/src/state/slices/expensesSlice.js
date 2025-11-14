@@ -24,11 +24,18 @@ export const addExpenseQuick = createAsyncThunk('expenses/createQuick', async (e
   return created;
 });
 
-// PUBLIC_INTERFACE
+/** PUBLIC_INTERFACE */
 export const deleteExpense = createAsyncThunk('expenses/delete', async (id) => {
   /** Deletes an expense by id via apiClient and returns deleted id. */
   await apiClient.delete(`/expenses/${id}`);
   return id;
+});
+
+/** PUBLIC_INTERFACE */
+export const updateExpenseAsync = createAsyncThunk('expenses/update', async ({ id, changes }) => {
+  /** Updates an expense via apiClient and returns updated entity. */
+  const updated = await apiClient.put(`/expenses/${id}`, changes);
+  return updated;
 });
 
 const initialState = {
@@ -77,6 +84,11 @@ const slice = createSlice({
       .addCase(deleteExpense.fulfilled, (state, action) => {
         const id = action.payload;
         state.items = state.items.filter((e) => e.id !== id);
+      })
+      .addCase(updateExpenseAsync.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const idx = state.items.findIndex((e) => e.id === updated.id);
+        if (idx !== -1) state.items[idx] = updated;
       });
   },
 });
