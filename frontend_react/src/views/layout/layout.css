@@ -18,8 +18,10 @@
   top: 0;
   height: 100vh;
   padding: 20px 16px;
-  background: var(--nav-surface);
+  /* Use dedicated sidebar variables; do not affect TopNav */
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
+  color: var(--sidebar-text);
 }
 
 .sidebar-header {
@@ -43,12 +45,15 @@
 
 .brand-name {
   font-weight: 700;
-  color: var(--text);
+  color: var(--sidebar-text);
 }
 
 .sidebar-nav {
   display: grid;
   gap: 6px;
+}
+.sidebar-nav .nav-item > span {
+  color: inherit; /* icons/text follow --sidebar-text */
 }
 
 .nav-item {
@@ -56,7 +61,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  color: var(--text);
+  color: var(--sidebar-text);
   text-decoration: none;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -64,8 +69,8 @@
 }
 
 .nav-item:hover {
-  background: var(--nav-hover-bg);
-  border-color: var(--border);
+  background: var(--sidebar-hover);
+  border-color: var(--sidebar-active-border);
 }
 
 .nav-item:focus-visible {
@@ -75,9 +80,9 @@
 
 /* Active route highlight uses new tokens and maintains WCAG contrast */
 .nav-item.active {
-  background: var(--nav-active-bg);
-  border-color: var(--nav-active-border);
-  box-shadow: inset 0 0 0 1px var(--nav-active-border);
+  background: var(--sidebar-active);
+  border-color: var(--sidebar-active-border);
+  box-shadow: inset 0 0 0 1px var(--sidebar-active-border);
 }
 
 /* Main column */

@@ -18,13 +18,23 @@
   --muted: #6B7280;
   --border: #E5E7EB;
 
-  /* Navigation-specific tokens for easy future tweaks */
+  /* Navigation-specific tokens for easy future tweaks (TopNav uses these) */
   --nav-surface: var(--surface);
   --nav-shadow: 0 6px 16px rgba(2, 6, 23, 0.06), 0 1px 3px rgba(2, 6, 23, 0.06);
   --nav-hover-bg: color-mix(in oklab, var(--primary) 10%, transparent);
   --nav-active-bg: color-mix(in oklab, var(--primary) 18%, transparent);
   --nav-active-border: color-mix(in oklab, var(--primary) 30%, transparent);
   --nav-focus-ring: color-mix(in oklab, var(--primary) 60%, transparent);
+
+  /* Sidebar-specific tokens (do not affect TopNav) */
+  /* Background: slightly tinted primary for subtle differentiation */
+  --sidebar-bg: color-mix(in oklab, var(--primary) 6%, var(--surface));
+  /* Text should meet contrast against sidebar bg */
+  --sidebar-text: #0b1220; /* near-black to ensure AA on light bg */
+  /* Hover/active surfaces with stronger primary mix for clear state */
+  --sidebar-hover: color-mix(in oklab, var(--primary) 12%, var(--sidebar-bg));
+  --sidebar-active: color-mix(in oklab, var(--primary) 20%, var(--sidebar-bg));
+  --sidebar-active-border: color-mix(in oklab, var(--primary) 35%, transparent);
 }
 
 [data-theme="dark"] {
@@ -40,6 +50,13 @@
   --nav-active-bg: color-mix(in oklab, var(--primary) 26%, transparent);
   --nav-active-border: color-mix(in oklab, var(--primary) 42%, transparent);
   --nav-focus-ring: color-mix(in oklab, var(--primary) 70%, transparent);
+
+  /* Sidebar dark tokens: keep good contrast on dark surfaces */
+  --sidebar-bg: color-mix(in oklab, var(--primary) 12%, var(--surface));
+  --sidebar-text: #e8eefc; /* light text for contrast on dark sidebar */
+  --sidebar-hover: color-mix(in oklab, var(--primary) 20%, var(--sidebar-bg));
+  --sidebar-active: color-mix(in oklab, var(--primary) 28%, var(--sidebar-bg));
+  --sidebar-active-border: color-mix(in oklab, var(--primary) 46%, transparent);
 }
 
 * { box-sizing: border-box; }
