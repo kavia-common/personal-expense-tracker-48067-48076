@@ -1,26 +1,80 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { addExpenseQuick } from '../../state/slices/expensesSlice';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addExpenseQuick, filterChanged, selectFilters } from '../../state/slices/expensesSlice';
 import { useFeatureFlags } from '../../hooks/useFeatureFlags';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 /**
  * Top navigation bar for quick actions and search.
  * Includes a theme toggle, quick add, and search input with a leading icon.
+ * The search field is debounced (≈300ms) and writes to global expenses filter (query).
+ * Pressing Enter navigates to /expenses to reveal results if the user is on another page.
  */
 export default function TopNav() {
   const dispatch = useDispatch();
   const { experimentsEnabled } = useFeatureFlags();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const globalFilters = useSelector(selectFilters);
 
   const [theme, setTheme] = useState(
     () => document.documentElement.getAttribute('data-theme') || 'light'
   );
-  const [search, setSearch] = useState('');
+  // Initialize from global filter query so TopNav reflects store state (including persisted session)
+  const [search, setSearch] = useState(globalFilters.query || '');
 
+  // Keep input synced when global query changes elsewhere (e.g., Filters component)
+  useEffect(() => {
+    setSearch(globalFilters.query || '');
+  }, [globalFilters.query]);
+
+  // Apply theme attribute on change
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+
+  // Debounced dispatcher to update Redux filter without spamming
+  const timeoutRef = useRef(null);
+  const debounceMs = 300;
+
+  // PUBLIC_INTERFACE
+  const dispatchQuery = useMemo(() => {
+    /** Debounced query dispatcher for wiring external search inputs to expenses filter. */
+    return (q) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        dispatch(filterChanged({ query: q }));
+      }, debounceMs);
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const onChangeSearch = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    dispatchQuery(val);
+  };
+
+  const onKeyDownSearch = (e) => {
+    if (e.key === 'Enter') {
+      // Force immediate sync (avoid waiting debounce) then navigate if needed
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      dispatch(filterChanged({ query: search }));
+      if (location.pathname !== '/expenses') {
+        navigate('/expenses');
+      }
+    }
+  };
 
   const onQuickAdd = () => {
     // Adds a placeholder expense for demonstration/testing via async thunk (persists to local)
@@ -60,7 +114,8 @@ export default function TopNav() {
             className="search-input"
             placeholder="Search expenses..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={onChangeSearch}
+            onKeyDown={onKeyDownSearch}
           />
         </div>
       </div>

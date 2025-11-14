@@ -38,9 +38,20 @@ export const updateExpenseAsync = createAsyncThunk('expenses/update', async ({ i
   return updated;
 });
 
+// Load persisted query from storage (optional persistence)
+function loadPersistedQuery() {
+  try {
+    const v = window.sessionStorage.getItem('ocean.expenses.filters.query');
+    return v ?? '';
+  } catch {
+    return '';
+  }
+}
+
 const initialState = {
   items: [],
-  filters: { query: '', min: undefined, max: undefined, date: '' },
+  // include query in filters; hydrate from sessionStorage if present
+  filters: { query: loadPersistedQuery(), min: undefined, max: undefined, date: '' },
   loading: false,
   error: '',
 };
@@ -51,13 +62,27 @@ const slice = createSlice({
   reducers: {
     // PUBLIC_INTERFACE
     filterChanged(state, action) {
-      /** Updates expense filter state. */
+      /** Updates expense filter state and persists query to sessionStorage. */
       state.filters = { ...state.filters, ...action.payload };
+      // persist query if supplied
+      if (Object.prototype.hasOwnProperty.call(action.payload || {}, 'query')) {
+        try {
+          const q = String(action.payload.query ?? '');
+          window.sessionStorage.setItem('ocean.expenses.filters.query', q);
+        } catch {
+          // ignore storage errors (e.g., SSR/tests)
+        }
+      }
     },
     // PUBLIC_INTERFACE
     resetFilters(state) {
-      /** Resets filters to initial values. */
-      state.filters = initialState.filters;
+      /** Resets filters to initial values and clears persisted query. */
+      state.filters = { query: '', min: undefined, max: undefined, date: '' };
+      try {
+        window.sessionStorage.removeItem('ocean.expenses.filters.query');
+      } catch {
+        // ignore
+      }
     },
   },
   extraReducers: (builder) => {
@@ -103,8 +128,14 @@ export const selectExpenses = (s) => selectExpensesState(s).items;
 export const selectFilters = (s) => selectExpensesState(s).filters;
 
 export const selectFilteredExpenses = createSelector([selectExpenses, selectFilters], (items, f) => {
+  const q = String(f.query || '').toLowerCase();
   return items.filter((e) => {
-    if (f.query && !String(e.title || '').toLowerCase().includes(String(f.query).toLowerCase())) return false;
+    // Text search on title and note (if present)
+    if (q) {
+      const hayTitle = String(e.title || '').toLowerCase();
+      const hayNote = String(e.note || '').toLowerCase();
+      if (!hayTitle.includes(q) && !hayNote.includes(q)) return false;
+    }
     if (typeof f.min === 'number' && Number(e.amount) < f.min) return false;
     if (typeof f.max === 'number' && Number(e.amount) > f.max) return false;
     if (f.date && e.date !== f.date) return false;
