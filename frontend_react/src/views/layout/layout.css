@@ -112,9 +112,24 @@
   max-width: 560px;
 }
 
+/* Container to allow inline leading icon */
+.search-input-with-icon {
+  position: relative;
+}
+
+.search-input-with-icon .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: color-mix(in oklab, var(--text) 50%, transparent);
+  pointer-events: none; /* ensure input remains interactive */
+}
+
+/* Increase left padding to make room for the icon */
 .search-input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 12px 10px 36px; /* left padding for icon */
   border-radius: 10px;
   border: 1px solid var(--border);
   outline: none;
@@ -129,6 +144,11 @@
 .search-input:focus {
   border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+/* Dark mode fine-tune: slightly lighten icon for contrast */
+[data-theme="dark"] .search-input-with-icon .search-icon {
+  color: color-mix(in oklab, var(--text) 70%, transparent);
 }
 
 .actions-wrap {
