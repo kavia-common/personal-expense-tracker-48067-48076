@@ -29,16 +29,25 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 ## Frontend-only mode
 
-This application supports a frontend-only local mode. When no backend URL is configured, all data persists in your browser and reports are computed on-device.
+This application supports a frontend-only local mode. When no backend URL is configured, all data persists in your browser and reports are computed on-device. Backend URLs are optional and unused in this mode.
 
 - Install dependencies: `npm install`
 - Start the app: `npm start`
-- Data storage: persisted via `localStorage` under:
+
+Data storage:
+- Persisted via `localStorage` under:
   - `ocean.expenses.categories`
   - `ocean.expenses.items`
 
-You do not need any `.env` file to run in this mode. If you want to be explicit, you can add a `.env.local` with only relevant keys:
+Reset local data:
+1. Open your browser’s Developer Tools and go to Application/Storage.
+2. Under Local Storage for `http://localhost:3000` (in development), delete:
+   - `ocean.expenses.categories`
+   - `ocean.expenses.items`
+Alternatively, clear site data for the origin via browser settings.
 
+Environment (optional):
+You do not need any `.env` file to run in this mode. If you want to be explicit, you can add a `.env.local` with only relevant keys:
 ```
 REACT_APP_FEATURE_FLAGS=charts
 REACT_APP_EXPERIMENTS_ENABLED=false
@@ -48,7 +57,7 @@ REACT_APP_EXPERIMENTS_ENABLED=false
 # REACT_APP_BACKEND_URL=
 ```
 
-If you later introduce a backend, set `REACT_APP_API_BASE` (e.g., `http://localhost:4000/api`) and optionally `REACT_APP_HEALTHCHECK_PATH` (default `/health`). The app will automatically attempt remote calls instead of the local repository.
+If you later introduce a backend, set `REACT_APP_API_BASE` (e.g., `http://localhost:4000/api`) and optionally `REACT_APP_HEALTHCHECK_PATH` (default `/health`). The app will automatically attempt remote calls instead of the local repository. See `src/ENVIRONMENT.md` for full details.
 
 ## Customization
 

@@ -1,6 +1,6 @@
 # Frontend-only Mode
 
-This project is currently scoped to run without a backend. All data is stored locally in your browser and never leaves your device unless you manually export or share it.
+This project runs without a backend by default. All data is stored locally in your browser and never leaves your device unless you manually export or share it. Backend URLs are optional and unused in this mode.
 
 ## What this means
 
@@ -37,6 +37,15 @@ To remove all locally stored data for this app:
    - `ocean.expenses.items`
 
 Alternatively, you can clear site data for the origin via your browser settings.
+
+## Relevant environment keys (optional)
+
+You do not need any env files for frontend-only mode. If you want to customize features, these keys are recognized:
+- `REACT_APP_FEATURE_FLAGS` (e.g., `charts`)
+- `REACT_APP_EXPERIMENTS_ENABLED` (`true`/`false`)
+- `REACT_APP_HEALTHCHECK_PATH` (defaults to `/health`, handled locally)
+
+Leave `REACT_APP_API_BASE` and `REACT_APP_BACKEND_URL` unset to remain in frontend-only mode.
 
 ## Re-enabling a backend later
 
